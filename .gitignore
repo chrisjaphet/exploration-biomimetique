@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Éditeurs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node (si utilisé pour un serveur local)
+node_modules/
+npm-debug.log*
+
+# Fichiers temporaires
+*.tmp
+*.log
+*.bak
+
+# Environnement
+.env
+.env.local

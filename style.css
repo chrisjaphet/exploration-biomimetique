@@ -1,0 +1,523 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Newsreader:wght@400;600;700&display=swap');
+
+/* ============================================
+   PALETTE EXACTE FIGMA
+   #1A5D48 — BLOC (vert principal)
+   #004432 — TEXT PAGE (vert foncé titres)
+   #93D4B9 — TEXT NAVBAR (menthe clair)
+   #FFFFFF — fond cartes et pages
+   ============================================ */
+:root {
+  --vert:        #1A5D48;
+  --vert-dark:   #004432;
+  --mint:        #93D4B9;
+  --mint-pale:   #D6EDE6;
+  --fond:        #F8FAFA;
+  --blanc:       #FFFFFF;
+  --texte:       #1A1A1A;
+  --texte-doux:  #6B7280;
+  --gris:        #E5E7EB;
+  --gris-mid:    #9CA3AF;
+  --brun:        #7C5230;
+  --brun-clair:  #A67C52;
+  --jaune:       #F5C842;
+  --rouge:       #DC2626;
+  --vert-ok:     #16A34A;
+  --cyan:        #0891B2;
+
+  --shadow-xs:  0 1px 3px rgba(0,0,0,.06);
+  --shadow-sm:  0 1px 6px rgba(0,0,0,.08);
+  --shadow:     0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:  0 12px 40px rgba(0,0,0,.12);
+  --radius-card: 12px;
+  --radius-sm:   8px;
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+  --ease-out:    cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter',sans-serif;background:var(--fond);color:var(--texte);
+  min-height:100vh;font-size:14px;overflow-x:hidden;line-height:1.5;
+}
+
+img{display:block;max-width:100%}
+button{cursor:pointer;font-family:'Inter',sans-serif}
+
+/* ============================================
+   NAVBAR — Figma exact
+   ============================================ */
+.navbar{
+  position:sticky;top:0;z-index:900;
+  background:var(--blanc);
+  border-bottom:1px solid var(--gris);
+  padding:0 40px;height:56px;
+  display:flex;align-items:center;gap:16px;
+  box-shadow:var(--shadow-xs);
+}
+
+.navbar-logo{
+  font-family:'Newsreader',serif;font-weight:700;font-size:15px;
+  color:var(--vert-dark);text-transform:none;
+  white-space:nowrap;display:flex;align-items:center;gap:7px;
+  margin-right:16px;letter-spacing:-.01em;
+}
+
+.navbar-logo svg{width:18px;height:18px;flex-shrink:0}
+
+.navbar-links{display:flex;align-items:center;gap:2px;flex:1}
+.navbar-links button{
+  background:none;border:none;font-size:13px;font-weight:500;
+  color:var(--texte-doux);padding:6px 14px;border-radius:20px;
+  transition:all .18s ease;white-space:nowrap;
+}
+.navbar-links button:hover{color:var(--vert-dark);background:rgba(26,93,72,.06)}
+.navbar-links button.active{
+  background:var(--vert);color:var(--blanc);font-weight:600;
+}
+
+/* XP bar — Figma style */
+.navbar-xp{display:flex;align-items:center;gap:8px;margin-left:auto;white-space:nowrap}
+.xp-label{font-size:11px;font-weight:600;color:var(--texte-doux);letter-spacing:.04em}
+.xp-bar-wrap{width:80px;height:5px;background:var(--gris);border-radius:99px;overflow:hidden}
+.xp-bar{height:100%;background:var(--vert);border-radius:99px;transition:width .7s var(--ease-out);width:0%}
+.xp-count{font-size:12px;font-weight:700;color:var(--vert-dark);min-width:50px;text-align:right}
+
+.burger{display:none;background:none;border:none;font-size:20px;color:var(--vert-dark);margin-left:auto;padding:4px}
+
+/* ============================================
+   MAIN LAYOUT
+   ============================================ */
+.main{max-width:1200px;margin:0 auto;padding:32px 40px;position:relative}
+.panel{display:none;animation:fadein .35s var(--ease-out)}
+.panel.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============================================
+   PLATEAU DE JEU
+   ============================================ */
+.plateau-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:20px;gap:16px;flex-wrap:wrap;
+}
+
+.plateau-title{
+  font-family:'Inter',sans-serif;font-size:24px;font-weight:700;
+  color:var(--vert-dark);line-height:1.2;
+}
+.plateau-title p{font-size:13px;font-weight:400;color:var(--texte-doux);margin-top:4px}
+
+/* "1 / 25 paires" badge */
+.score-badge{
+  background:var(--vert);color:var(--blanc);
+  font-size:13px;font-weight:600;padding:8px 18px;border-radius:99px;
+  white-space:nowrap;transition:all .3s var(--ease-spring);
+}
+
+/* Controls */
+.plateau-controls{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+
+.search-wrap{position:relative;flex:1;min-width:180px;max-width:300px}
+.search-wrap input{
+  width:100%;padding:8px 14px 8px 36px;border:1px solid var(--gris);
+  border-radius:8px;font-size:13px;background:var(--blanc);color:var(--texte);
+  outline:none;transition:border-color .18s;
+}
+.search-wrap input:focus{border-color:var(--vert)}
+.search-wrap input::placeholder{color:var(--gris-mid)}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--gris-mid);font-size:14px;pointer-events:none}
+
+.btn-magasin{
+  background:var(--vert-dark);color:var(--blanc);border:none;
+  border-radius:99px;padding:8px 18px;font-size:13px;font-weight:600;
+  transition:all .18s;
+}
+.btn-magasin:hover{opacity:.88}
+
+.btn-voir-indices{
+  background:none;border:1px solid var(--vert);color:var(--vert);
+  border-radius:99px;padding:8px 18px;font-size:13px;font-weight:500;
+  transition:all .18s;width:100%;margin-top:8px;
+}
+.btn-voir-indices:hover{background:var(--vert);color:#fff}
+
+.btn-next-round{
+  background:var(--vert);color:#fff;border:none;border-radius:8px;
+  padding:9px 20px;font-size:13px;font-weight:600;
+  transition:all .18s;display:none;align-items:center;gap:6px;
+}
+.btn-next-round:hover{background:var(--vert-dark)}
+.btn-next-round.visible{display:flex}
+
+/* ============================================
+   LÉGENDE — Figma style (pill container)
+   ============================================ */
+.legende{
+  display:flex;align-items:center;gap:20px;margin-bottom:20px;
+  background:var(--blanc);border:1px solid var(--gris);
+  border-radius:99px;padding:8px 20px;width:fit-content;
+  box-shadow:var(--shadow-xs);
+}
+.legende-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--texte-doux)}
+.leg-dot{width:10px;height:10px;border-radius:50%;border:1.5px solid;flex-shrink:0}
+.leg-dot.vivant{border-color:var(--vert-ok);background:transparent}
+.leg-dot.appli{border-color:var(--cyan);background:var(--cyan)}
+.leg-dot.sel{border-color:var(--cyan);background:transparent}
+.leg-dot.correct{border-color:var(--vert-ok);background:var(--vert-ok)}
+.leg-dot.incorrect{border-color:var(--rouge);background:var(--rouge)}
+
+/* ============================================
+   GRILLE DE CARTES
+   ============================================ */
+.cards-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(152px,1fr));
+  gap:14px;
+}
+
+/* Apparition staggerée */
+.card{animation:card-in .4s var(--ease-out) both}
+.card:nth-child(1){animation-delay:.03s}.card:nth-child(2){animation-delay:.06s}
+.card:nth-child(3){animation-delay:.09s}.card:nth-child(4){animation-delay:.12s}
+.card:nth-child(5){animation-delay:.15s}.card:nth-child(6){animation-delay:.18s}
+.card:nth-child(7){animation-delay:.20s}.card:nth-child(8){animation-delay:.22s}
+.card:nth-child(n+9){animation-delay:.25s}
+@keyframes card-in{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============================================
+   CARTE — Design Figma exact
+   ============================================ */
+.card{
+  background:var(--blanc);
+  border-radius:var(--radius-card);
+  border:1.5px solid var(--texte); /* thin black border = état normal */
+  padding:12px 10px 14px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  cursor:pointer;user-select:none;position:relative;
+  aspect-ratio:3/4.2;justify-content:space-between;overflow:hidden;
+  box-shadow:var(--shadow-xs);
+  transition:
+    transform .2s var(--ease-out),
+    border-color .18s ease,
+    box-shadow .2s ease,
+    opacity .4s ease;
+  will-change:transform;
+}
+
+/* Titre uppercase Inter Bold */
+.card-title{
+  font-family:'Inter',sans-serif;font-size:10px;font-weight:800;
+  text-align:center;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--texte);line-height:1.3;width:100%;padding:0 22px 0 4px;
+  flex-shrink:0;
+}
+
+/* Cercle photo */
+.card-photo-wrap{
+  width:84px;height:84px;border-radius:50%;overflow:hidden;
+  border:1.5px solid var(--gris);flex-shrink:0;background:var(--fond);
+  transition:transform .25s var(--ease-spring),border-color .18s;
+}
+.card-photo-wrap img{width:100%;height:100%;object-fit:cover}
+
+/* Tagline italic */
+.card-tagline{
+  font-family:'Inter',sans-serif;font-size:10px;font-weight:400;
+  font-style:italic;text-align:center;color:var(--texte-doux);
+  line-height:1.45;padding:0 4px;flex-shrink:0;
+}
+
+/* Badge état (✓ ou ✗) */
+.card-badge{
+  position:absolute;top:8px;right:8px;
+  width:20px;height:20px;border-radius:50%;
+  display:none;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;z-index:2;
+}
+
+/* ---- ÉTATS ---- */
+
+/* Hover → bordure jaune/dorée */
+.card:hover:not(.card--validee):not(.card--incorrecte):not(.card--correcte){
+  border-color:var(--jaune);
+  transform:translateY(-4px);
+  box-shadow:0 0 0 1px var(--jaune),var(--shadow);
+  z-index:2;
+}
+.card:hover:not(.card--validee) .card-photo-wrap{transform:scale(1.06)}
+
+/* Vivant → bordure verte (repos) */
+.card--vivant:not(.card--selected):not(.card--correcte):not(.card--incorrecte):not(.card--validee){
+  border-color:var(--vert-ok);
+}
+
+/* Application → bordure bleue (repos) */
+.card--application:not(.card--selected):not(.card--correcte):not(.card--incorrecte):not(.card--validee){
+  border-color:var(--cyan);
+}
+
+/* Sélectionnée → bordure cyan épaisse */
+.card--selected{
+  border-color:var(--cyan)!important;border-width:2.5px;
+  transform:translateY(-4px);
+  box-shadow:0 0 0 2px rgba(8,145,178,.2),var(--shadow)!important;z-index:2;
+}
+.card--selected .card-photo-wrap{border-color:var(--cyan)}
+
+/* Correcte → bordure verte + badge ✓ */
+.card--correcte{
+  border-color:var(--vert-ok)!important;border-width:2px;
+  box-shadow:0 0 0 2px rgba(22,163,74,.15)!important;
+  animation:card-correct .55s var(--ease-spring);cursor:default;
+}
+.card--correcte .card-badge{
+  display:flex;background:var(--vert-ok);color:#fff;
+}
+
+/* Incorrecte → bordure rouge + badge ✗ */
+.card--incorrecte{
+  border-color:var(--rouge)!important;border-width:2px;
+  box-shadow:0 0 0 2px rgba(220,38,38,.15)!important;
+  animation:card-shake .4s ease;cursor:default;
+}
+.card--incorrecte .card-badge{
+  display:flex;background:var(--rouge);color:#fff;
+}
+
+/* Validée grisée */
+.card--validee{
+  border-color:var(--gris)!important;border-width:1.5px!important;
+  box-shadow:none!important;opacity:.35!important;
+  cursor:default;filter:grayscale(1);transform:none!important;
+  transition:opacity .5s,filter .5s;
+}
+
+@keyframes card-correct{0%{transform:scale(1)}35%{transform:scale(1.08) rotate(1deg)}100%{transform:scale(1)}}
+@keyframes card-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+
+/* ============================================
+   PARTICULES
+   ============================================ */
+.particle{position:fixed;pointer-events:none;z-index:9999;border-radius:50%;animation:p-fly .9s var(--ease-out) forwards}
+@keyframes p-fly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
+
+/* ============================================
+   BANNERS — Round + Victoire
+   ============================================ */
+.round-banner{display:none;background:linear-gradient(135deg,var(--vert) 0%,#1F7A5A 100%);color:#fff;border-radius:12px;padding:24px 28px;margin-bottom:24px;text-align:center;box-shadow:var(--shadow)}
+.round-banner.show{display:block;animation:fadein .5s var(--ease-spring)}
+.round-banner h3{font-size:20px;font-weight:700;margin-bottom:6px}
+.round-banner p{opacity:.9;font-size:14px}
+
+.victoire-banner{display:none;background:linear-gradient(135deg,var(--vert-dark) 0%,var(--vert) 100%);color:#fff;border-radius:12px;padding:36px;margin-bottom:28px;text-align:center;box-shadow:var(--shadow-lg)}
+.victoire-banner.show{display:block;animation:pop-in .6s var(--ease-spring)}
+@keyframes pop-in{0%{opacity:0;transform:scale(.85)}100%{opacity:1;transform:scale(1)}}
+.victoire-banner h2{font-family:'Newsreader',serif;font-size:32px;margin-bottom:10px}
+.victoire-banner p{opacity:.9;font-size:15px}
+.xp-final{font-size:48px;font-weight:800;color:var(--mint);margin:14px 0}
+
+/* ============================================
+   MODAL EXPLICATION — Figma exact
+   ============================================ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  z-index:2000;display:flex;align-items:center;justify-content:center;
+  padding:20px;opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+
+.modal{
+  background:var(--blanc);border-radius:16px;padding:32px 28px;
+  max-width:480px;width:100%;
+  box-shadow:var(--shadow-lg);
+  transform:scale(.9) translateY(20px);
+  transition:transform .4s var(--ease-spring);
+  position:relative;
+}
+.modal-overlay.open .modal{transform:scale(1) translateY(0)}
+
+/* Barre verte top */
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--vert-dark),var(--vert),var(--mint));border-radius:16px 16px 0 0}
+
+.modal-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--vert);margin-bottom:8px}
+
+.modal-title{
+  font-family:'Newsreader',serif;font-size:20px;font-weight:700;
+  color:var(--vert-dark);margin-bottom:18px;line-height:1.3;
+}
+
+/* Paire */
+.modal-pair{display:flex;margin-bottom:18px;background:var(--fond);border-radius:10px;overflow:hidden;border:1px solid var(--gris)}
+.modal-pair-card{flex:1;text-align:center;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.modal-pair-card img{width:48px;height:48px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gris)}
+.modal-pair-card .name{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--texte)}
+.modal-pair-sep{width:1px;background:var(--gris);display:flex;align-items:center;justify-content:center;position:relative}
+.modal-pair-sep::after{content:'↔';position:absolute;background:var(--fond);color:var(--vert);font-size:11px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:1px solid var(--gris);border-radius:50%}
+
+/* Texte explication avec bordure gauche verte */
+.modal-text{font-size:13px;line-height:1.72;color:var(--texte-doux);margin-bottom:20px;border-left:3px solid var(--mint);padding-left:14px}
+
+/* XP strip */
+.modal-xp{display:flex;align-items:center;gap:8px;background:var(--vert);color:#fff;border-radius:8px;padding:10px 16px;font-weight:600;font-size:13px;margin-bottom:18px}
+
+.modal-close{width:100%;background:var(--vert-dark);color:#fff;border:none;border-radius:8px;padding:12px;font-size:13px;font-weight:700;transition:all .18s;letter-spacing:.02em}
+.modal-close:hover{background:var(--vert)}
+
+/* ============================================
+   PAGES — Règles / Inventaire / Indices / À Propos
+   ============================================ */
+.page-header{margin-bottom:24px}
+.page-title{
+  font-family:'Inter',sans-serif;font-size:28px;font-weight:700;
+  color:var(--vert-dark);margin-bottom:6px;display:flex;align-items:center;gap:10px;
+}
+.page-subtitle{font-size:13px;color:var(--texte-doux);line-height:1.6}
+
+/* ---- RÈGLES ---- */
+.regles-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.regles-card{background:var(--blanc);border:1px solid var(--gris);border-radius:12px;padding:24px}
+.regles-card.full{grid-column:1/-1}
+.regles-card-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--vert-dark);margin-bottom:12px}
+.regles-card-title span{font-size:16px}
+.regles-card p{font-size:13px;color:var(--texte-doux);line-height:1.7}
+.regles-steps{display:flex;flex-direction:column;gap:8px}
+.regles-step{display:flex;gap:10px;align-items:flex-start}
+.step-num{font-size:12px;font-weight:700;color:var(--vert-dark);background:var(--mint-pale);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;color:var(--texte-doux);line-height:1.6}
+.step-text strong{color:var(--vert)}
+.step-text .app{color:var(--cyan)}
+.btn-voir-indices-inline{background:var(--vert-dark);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;margin-top:14px;transition:all .18s;display:inline-flex;align-items:center;gap:6px}
+.btn-voir-indices-inline:hover{background:var(--vert)}
+
+/* ---- INVENTAIRE ---- */
+.inventaire-top{background:var(--blanc);border:1px solid var(--gris);border-radius:12px;padding:28px;margin-bottom:16px;text-align:center}
+.inv-xp-big{font-size:40px;font-weight:800;color:var(--vert-dark);line-height:1}
+.inv-xp-label{font-size:12px;font-weight:600;color:var(--texte-doux);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;padding-bottom:12px;border-bottom:2px solid var(--vert);display:inline-block}
+.inv-stats-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.inv-stat{background:var(--blanc);border:1px solid var(--gris);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:4px;position:relative}
+.inv-stat .val{font-size:32px;font-weight:700;color:var(--vert-dark)}
+.inv-stat .lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--texte-doux)}
+.inv-stat .dot-row{display:flex;gap:4px;margin-top:6px}
+.inv-stat .dot{width:8px;height:8px;border-radius:50%;background:var(--gris)}
+.inv-stat .dot.active{background:var(--vert)}
+.inv-magasin{position:absolute;top:16px;right:16px;background:var(--vert);color:#fff;border:none;border-radius:99px;padding:5px 14px;font-size:11px;font-weight:700}
+
+.collection-title{font-size:16px;font-weight:700;color:var(--vert-dark);margin-bottom:14px}
+.collection-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.collection-card{background:var(--blanc);border:1px solid var(--gris);border-radius:10px;overflow:hidden;cursor:pointer;transition:all .18s}
+.collection-card:hover{border-color:var(--vert);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.collection-card img{width:100%;height:90px;object-fit:cover}
+.collection-card-info{padding:10px}
+.collection-card-tag{font-size:9px;font-weight:700;background:var(--vert);color:#fff;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:5px}
+.collection-card-name{font-size:11px;font-weight:700;color:var(--vert-dark);margin-bottom:3px}
+.collection-card-desc{font-size:10px;color:var(--texte-doux)}
+
+.collection-slot{background:var(--fond);border:1.5px dashed var(--gris);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px;min-height:140px;color:var(--gris-mid);font-size:12px;text-align:center}
+.collection-slot svg{width:24px;height:24px;opacity:.4}
+.slot-price{font-size:11px;font-weight:700;color:var(--brun);background:rgba(124,82,48,.1);padding:3px 10px;border-radius:99px}
+
+/* ---- INDICES ---- */
+.indices-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+
+.indice-card{
+  background:var(--blanc);border:1px solid var(--gris);border-radius:12px;
+  padding:16px;display:flex;flex-direction:column;gap:10px;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.indice-card:hover{border-color:var(--vert);box-shadow:var(--shadow-sm)}
+
+.indice-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.indice-icon{font-size:16px;flex-shrink:0}
+.indice-titre{font-size:13px;font-weight:700;color:var(--vert-dark);line-height:1.3}
+
+.badge-debloque{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  background:var(--vert);color:#fff;padding:3px 8px;border-radius:4px;
+  white-space:nowrap;flex-shrink:0;
+}
+
+.indice-texte{font-size:12px;color:var(--texte-doux);line-height:1.6;font-style:italic;flex:1}
+.indice-texte.locked{filter:blur(4px);user-select:none;pointer-events:none}
+
+.indice-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--gris)}
+.indice-analyse{font-size:11px;color:var(--texte-doux);display:flex;align-items:center;gap:4px}
+.consulter-link{font-size:11px;font-weight:600;color:var(--vert);text-decoration:none;cursor:pointer;background:none;border:none;padding:0}
+.consulter-link:hover{text-decoration:underline}
+
+/* Cadenas + bouton débloquer */
+.indice-lock{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 0}
+.lock-icon{font-size:24px;color:var(--gris-mid)}
+.btn-debloquer{
+  background:var(--brun);color:#fff;border:none;border-radius:99px;
+  padding:7px 18px;font-size:12px;font-weight:700;
+  transition:all .18s;
+}
+.btn-debloquer:hover{background:var(--brun-clair)}
+.btn-debloquer:disabled{background:var(--gris);color:var(--gris-mid);cursor:not-allowed}
+
+/* ---- À PROPOS ---- */
+.apropos-card{background:var(--blanc);border:1px solid var(--gris);border-radius:12px;padding:28px;max-width:680px}
+.apropos-section{margin-bottom:20px}
+.apropos-section:last-child{margin-bottom:0}
+.apropos-section h3{font-size:14px;font-weight:700;color:var(--vert-dark);margin-bottom:8px}
+.apropos-section p{font-size:13px;color:var(--texte-doux);line-height:1.75}
+.apropos-section p strong{color:var(--texte)}
+
+/* ============================================
+   CONFETTI
+   ============================================ */
+.confetti-piece{position:fixed;pointer-events:none;z-index:9998;animation:confetti-fall linear forwards}
+@keyframes confetti-fall{0%{transform:translate(0,-20px) rotate(0deg);opacity:1}100%{transform:translate(var(--cx),110vh) rotate(var(--cr));opacity:0}}
+
+/* ============================================
+   TOAST
+   ============================================ */
+.toast{
+  position:fixed;bottom:32px;left:50%;
+  transform:translateX(-50%) translateY(70px);
+  background:var(--texte);color:#fff;padding:11px 22px;
+  border-radius:99px;font-size:13px;font-weight:600;z-index:3000;
+  transition:transform .35s var(--ease-spring),opacity .25s;
+  white-space:nowrap;box-shadow:var(--shadow-lg);opacity:0;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{background:var(--vert)}
+.toast.error{background:var(--rouge)}
+.toast.info{background:var(--brun)}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media(max-width:1024px){
+  .main{padding:24px 28px}
+  .navbar{padding:0 28px}
+}
+@media(max-width:768px){
+  .navbar{flex-wrap:wrap;height:auto;padding:10px 20px;gap:10px}
+  .navbar-links{display:none;width:100%;flex-wrap:wrap;gap:4px;order:3}
+  .navbar-links.open{display:flex}
+  .burger{display:block}
+  .navbar-xp{margin-left:auto}
+  .xp-bar-wrap{width:60px}
+  .main{padding:20px 16px}
+  .cards-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+  .card-photo-wrap{width:70px;height:70px}
+  .regles-grid{grid-template-columns:1fr}
+  .inv-stats-row{grid-template-columns:1fr}
+  .legende{flex-wrap:wrap;border-radius:12px;padding:10px 14px;gap:10px}
+  .plateau-controls{gap:8px}
+}
+@media(max-width:480px){
+  .cards-grid{grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:8px}
+  .card{padding:10px 8px 12px}
+  .card-photo-wrap{width:62px;height:62px}
+  .card-title{font-size:9px}
+  .modal{padding:24px 18px}
+  .modal-title{font-size:17px}
+  .page-title{font-size:22px}
+}
