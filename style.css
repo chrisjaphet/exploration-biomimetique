@@ -52,8 +52,11 @@
 html { scroll-behavior:smooth }
 body {
   font-family:'Inter',sans-serif;
-  background-color:#F7F5F0;
-  background-image:radial-gradient(circle at center, #FDFDFB 0%, #F4F1EA 100%);
+  background-color:#EDE8DF;
+  background-image: url('assets/botanical_bg.png');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
   color:var(--texte);
   min-height:100vh;
   font-size:14px;
