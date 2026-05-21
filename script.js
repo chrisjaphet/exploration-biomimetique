@@ -59,6 +59,7 @@ const state = {
   combo: 0,
   trophiesUnlocked: [],
   superIndiceUsedThisRound: false,
+  superIndicePenaltyTurns: 0,
   firstCardClickTime: null,
   trophyQueue: [],
   trophyShowing: false,
@@ -371,7 +372,21 @@ function markCorrect(a, b) {
   });
 
   const oldPts = state.xp;
-  state.xp += 100;
+  const penaltyActive = state.superIndicePenaltyTurns > 0;
+
+  if (penaltyActive) {
+    state.superIndicePenaltyTurns--;
+    showFloatingScore(a.el, '🔒 +0', '#8B3A3A');
+    if (state.superIndicePenaltyTurns > 0) {
+      showToast(`🔒 Pas de points (Super Indice) — encore ${state.superIndicePenaltyTurns} paire(s)`);
+    } else {
+      showToast('✅ Pénalité terminée — les points reprennent !');
+    }
+  } else {
+    state.xp += 100;
+    showFloatingScore(a.el, '+100', '#2D5A3D');
+  }
+
   state.pairesReussies++;
   state.validatedPairs.push(a.card.pairId);
   state.roundPairsRestantes--;
@@ -385,7 +400,6 @@ function markCorrect(a, b) {
     state.firstCardClickTime = null;
   }
 
-  showFloatingScore(a.el, '+100', '#2D5A3D');
   spawnParticles(a.el);
   spawnParticles(b.el);
   updatePoints();
@@ -760,6 +774,7 @@ function onDocClickSI(e) {
 function triggerSuperIndice(card, el) {
   state.superIndiceActif = false;
   state.superIndiceUsedThisRound = true;
+  state.superIndicePenaltyTurns = 3;
   document.getElementById('btn-super-indice')?.classList.remove('active');
   document.getElementById('cards-grid')?.classList.remove('super-indice-active');
   document.removeEventListener('click', onDocClickSI);
@@ -767,7 +782,7 @@ function triggerSuperIndice(card, el) {
   state.xp -= 50;
   updatePoints();
   showFloatingScore(el, '-50 pts', '#8B3A3A');
-  showToast('✨ Super Indice activé ! -50 pts');
+  showToast('✨ Super Indice activé ! Pas de points pendant 3 paires 🔒');
   checkAndUnlockTrophy('stratege');
 
   const cardsInDOM = document.querySelectorAll(`#cards-grid .card[data-pid="${card.pairId}"]`);

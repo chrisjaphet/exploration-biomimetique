@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr"><head>
+  <meta charset="UTF-8">
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      var div = document.createElement('div');
+      div.id = 'debug-error-log';
+      div.style.position = 'fixed';
+      div.style.top = '0';
+      div.style.left = '0';
+      div.style.width = '100%';
+      div.style.background = 'rgba(255,0,0,0.9)';
+      div.style.color = 'white';
+      div.style.padding = '20px';
+      div.style.zIndex = '100000';
+      div.style.fontFamily = 'monospace';
+      div.style.whiteSpace = 'pre-wrap';
+      div.style.fontSize = '16px';
+      div.innerHTML = 'ERROR: ' + message + ' at ' + source + ':' + lineno + ':' + colno + '\n' + (error ? error.stack : '');
+      document.body.appendChild(div);
+    };
+    console.error = function() {
+      var div = document.createElement('div');
+      div.style.background = 'orange';
+      div.style.color = 'black';
+      div.style.padding = '10px';
+      div.innerHTML = 'CONSOLE ERROR: ' + Array.prototype.slice.call(arguments).join(' ');
+      document.body.appendChild(div);
+    };
+  </script>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Exploration Biomimétique — STK Architecture</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================================================
+     NAVBAR — Figma exact
+     ================================================ -->
+<nav class="navbar">
+  <div class="navbar-logo">
+    <!-- Leaf SVG icon -->
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"></path>
+      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
+    </svg>
+    Exploration Biomimétique
+  </div>
+
+  <div class="navbar-links">
+    <button class="active" data-panel="jeu">Jouer</button>
+    <button data-panel="regles">Les règles</button>
+    <button data-panel="inventaire">Inventaire</button>
+    <button data-panel="indices">Indices</button>
+    <button data-panel="apropos">A propos</button>
+  </div>
+
+  <div class="navbar-xp">
+    <span class="xp-label">XP</span>
+    <div class="xp-bar-wrap"><div class="xp-bar" id="xp-bar" style="width: 0%;"></div></div>
+    <button id="btn-super-indice" class="super-indice-btn" title="Super Indice">
+      ✨ <span class="super-indice-cost">50 pts</span>
+    </button>
+    <span class="xp-count" id="xp-count">0 XP</span>
+  </div>
+
+  <button class="burger" id="burger">☰</button>
+</nav>
+
+<!-- ================================================
+     MAIN
+     ================================================ -->
+<main class="main">
+
+  <!-- ======== PANEL JEU ======== -->
+  <section class="panel active" id="panel-jeu">
+
+    <!-- Victoire finale -->
+    <div class="victoire-banner" id="victoire-banner">
+      <h2>🎉 Félicitations !</h2>
+      <p>Vous avez trouvé toutes les paires biomimétiques.</p>
+      <div class="xp-final" id="victoire-xp">0 XP</div>
+      <p>Vous maîtrisez maintenant les liens entre le vivant et l'innovation humaine.</p>
+    </div>
+
+    <!-- Round terminé -->
+    <div class="round-banner" id="round-banner">
+      <h3 id="round-banner-title">Round terminé !</h3>
+      <p id="round-banner-sub"></p>
+    </div>
+
+    <!-- Header -->
+    <div class="plateau-header">
+      <div class="plateau-title">
+        Plateau de jeu
+        <p>Associez chaque élément du vivant à son application humaine.</p>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <div class="score-badge" id="score-badge">0 / 25 paires</div>
+        <button class="btn-magasin" id="btn-magasin">Magasin</button>
+        <button class="btn-voir-indices" id="btn-voir-indices">Voir les indices</button>
+      </div>
+    </div>
+
+    <!-- Controls : search + next round -->
+    <div class="plateau-controls">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Rechercher une carte...">
+      </div>
+      <button class="btn-next-round" id="btn-next-round">Round suivant →</button>
+    </div>
+
+    <!-- Légende — Figma pill -->
+    <div class="legende">
+      <div class="legende-item"><div class="leg-dot vivant"></div><span>Élément vivant</span></div>
+      <div class="legende-item"><div class="leg-dot appli"></div><span>Application humaine</span></div>
+      <div class="legende-item"><div class="leg-dot sel"></div><span>Sélectionnée</span></div>
+      <div class="legende-item"><div class="leg-dot correct"></div><span>Paire correcte</span></div>
+      <div class="legende-item"><div class="leg-dot incorrect"></div><span>Paire incorrecte</span></div>
+    </div>
+
+    <!-- Grille -->
+    <div class="cards-grid" id="cards-grid"><div class="card card--vivant" data-id="13" data-pid="7">
+    <div class="card-badge"></div>
+    <div class="card-title">SCARABÉE STENOCARA</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="SCARABÉE STENOCARA" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Je capture l'eau sur mes bosses hydrophiles."</div>
+  </div><div class="card card--application" data-id="16" data-pid="8">
+    <div class="card-badge"></div>
+    <div class="card-title">ISOLATION THERMIQUE</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="ISOLATION THERMIQUE" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"L'architecture du vivant au service du bâtiment."</div>
+  </div><div class="card card--application" data-id="38" data-pid="19">
+    <div class="card-badge"></div>
+    <div class="card-title">AMPOULE LED</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="AMPOULE LED" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"La lumière froide de la luciole reproduite."</div>
+  </div><div class="card card--application" data-id="20" data-pid="10">
+    <div class="card-badge"></div>
+    <div class="card-title">CAMOUFLAGE ADAPTATIF</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1497436072909-60f360e1d4b1?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="CAMOUFLAGE ADAPTATIF" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Je change d'apparence selon mon environnement."</div>
+  </div><div class="card card--vivant" data-id="35" data-pid="18">
+    <div class="card-badge"></div>
+    <div class="card-title">CORAIL</div>
+    <div class="card-photo-wrap" style="background: var(--mint-pale);">
+      <img src="https://images.unsplash.com/photo-1504384308090-c5bc1d1f434f?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="CORAIL" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'" style="display: none;">
+    </div>
+    <div class="card-tagline">"Je construis des récifs en absorbant le CO₂."</div>
+  </div><div class="card card--application" data-id="14" data-pid="7">
+    <div class="card-badge"></div>
+    <div class="card-title">FILET CAPTEUR DE ROSÉE</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1503435980610-a51f3ddfee50?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="FILET CAPTEUR DE ROSÉE" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Je crée de l'eau potable à partir de la brume."</div>
+  </div><div class="card card--vivant" data-id="47" data-pid="24">
+    <div class="card-badge"></div>
+    <div class="card-title">FEUILLE D'ÉRABLE</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1508739773434-c26b3d09e071?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="FEUILLE D'ÉRABLE" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Je vole en tournant pour atterrir doucement."</div>
+  </div><div class="card card--application" data-id="48" data-pid="24">
+    <div class="card-badge"></div>
+    <div class="card-title">DRONE MONO-AILE</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1527977966376-1c8408f9f108?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="DRONE MONO-AILE" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Planer longtemps avec une seule aile."</div>
+  </div><div class="card card--vivant" data-id="37" data-pid="19">
+    <div class="card-badge"></div>
+    <div class="card-title">LUCIOLE</div>
+    <div class="card-photo-wrap" style="background: var(--mint-pale);">
+      <img src="https://images.unsplash.com/photo-1445558078770-7f5b6f977734?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="LUCIOLE" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'" style="display: none;">
+    </div>
+    <div class="card-tagline">"Je produis de la lumière froide sans gaspiller."</div>
+  </div><div class="card card--vivant" data-id="15" data-pid="8">
+    <div class="card-badge"></div>
+    <div class="card-title">MANCHOT EMPEREUR</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1551986782-d0169b3f8fa7?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="MANCHOT EMPEREUR" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"En groupe, nous créons un bouclier thermique."</div>
+  </div><div class="card card--application" data-id="46" data-pid="23">
+    <div class="card-badge"></div>
+    <div class="card-title">ROBOT GRIMPEUR</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="ROBOT GRIMPEUR" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Grimper sans colle, comme un gecko."</div>
+  </div><div class="card card--application" data-id="4" data-pid="2">
+    <div class="card-badge"></div>
+    <div class="card-title">ÉOLIENNE TUBERCULEUSE</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="ÉOLIENNE TUBERCULEUSE" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Mes pales captent le vent avec plus de force."</div>
+  </div><div class="card card--vivant" data-id="3" data-pid="2">
+    <div class="card-badge"></div>
+    <div class="card-title">BALEINE À BOSSE</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1568430462989-44163eb1752f?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="BALEINE À BOSSE" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Mes nageoires bossélées fendent l'eau."</div>
+  </div><div class="card card--vivant" data-id="45" data-pid="23">
+    <div class="card-badge"></div>
+    <div class="card-title">GECKO (ADHÉRENCE)</div>
+    <div class="card-photo-wrap" style="background: var(--mint-pale);">
+      <img src="https://images.unsplash.com/photo-1520763462-46c5555b39e8?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="GECKO (ADHÉRENCE)" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'" style="display: none;">
+    </div>
+    <div class="card-tagline">"Je grimpe sur n'importe quelle surface."</div>
+  </div><div class="card card--application" data-id="36" data-pid="18">
+    <div class="card-badge"></div>
+    <div class="card-title">BÉTON BIOSOURCÉ</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="BÉTON BIOSOURCÉ" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Construire en capturant le carbone."</div>
+  </div><div class="card card--vivant" data-id="19" data-pid="10">
+    <div class="card-badge"></div>
+    <div class="card-title">PIEUVRE</div>
+    <div class="card-photo-wrap">
+      <img src="https://images.unsplash.com/photo-1545671913-b89ac1b4ac10?auto=format&amp;fit=crop&amp;w=300&amp;h=300" alt="PIEUVRE" loading="lazy" onerror="this.parentElement.style.background='var(--mint-pale)';this.style.display='none'">
+    </div>
+    <div class="card-tagline">"Je change de couleur en un instant."</div>
+  </div></div>
+  </section>
+
+  <!-- ======== PANEL RÈGLES ======== -->
+  <section class="panel" id="panel-regles">
+    <div class="page-header">
+      <h1 class="page-title">📖 Règles du jeu</h1>
+      <p class="page-subtitle">Comment jouer à Exploration Biomimétique ? Apprenez les bases de l'observation scientifique inspirée par le vivant.</p>
+    </div>
+
+    <div class="regles-grid">
+      <!-- Objectif (full width) -->
+      <div class="regles-card full">
+        <div class="regles-card-title"><span>🎯</span> Objectif</div>
+        <p id="regles-objectif">Associer chaque élément du vivant à l'application humaine qui s'en inspire. Devenez un expert en observant les ingéniosités de la nature pour résoudre nos défis technologiques actuels.</p>
+      </div>
+
+      <!-- Comment jouer -->
+      <div class="regles-card">
+        <div class="regles-card-title"><span>⊙</span> Comment jouer</div>
+        <div class="regles-steps" id="regles-steps"><div class="regles-step"><div class="step-num">01</div><div class="step-text">Toutes les cartes sont visibles sur le plateau dès le début de la partie.</div></div><div class="regles-step"><div class="step-num">02</div><div class="step-text">Cliquez sur une carte <strong>Vivant</strong> (bordure verte) puis une carte <strong class="app">Application</strong> (bordure bleue).</div></div><div class="regles-step"><div class="step-num">03</div><div class="step-text">Si la paire est correcte : une explication détaillée apparaît et vous gagnez de l'XP !</div></div><div class="regles-step"><div class="step-num">04</div><div class="step-text">Si c'est incorrect : les cartes se signalent en rouge et restent disponibles pour un nouvel essai.</div></div></div>
+      </div>
+
+      <!-- XP + Indices -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="regles-card">
+          <div class="regles-card-title"><span>⚡</span> L'XP</div>
+          <p id="regles-xp">Vous gagnez 100 XP par paire correcte trouvée. Dépensez vos XP dans l'inventaire pour acheter des indices (50 XP chacun).</p>
+        </div>
+        <div class="regles-card">
+          <div class="regles-card-title"><span>📍</span> Les indices</div>
+          <p id="regles-indices">Un indice vous donne un coup de pouce sur une paire non encore trouvée. Achetez-les dans l'onglet Indices.</p>
+          <button class="btn-voir-indices-inline" onclick="navigateTo('indices')">Voir les indices →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== PANEL INVENTAIRE ======== -->
+  <section class="panel" id="panel-inventaire">
+    <div class="page-header">
+      <h1 class="page-title">🎒 Inventaire</h1>
+      <p class="page-subtitle">Vos statistiques et ressources accumulées.</p>
+    </div>
+
+    <!-- XP principal centré -->
+    <div class="inventaire-top">
+      <div class="inv-xp-big" id="inv-xp-val">0</div>
+      <div class="inv-xp-label">XP DISPONIBLES</div>
+    </div>
+
+    <!-- Stats -->
+    <div class="inv-stats-row">
+      <div class="inv-stat">
+        <div class="val" id="inv-pairs-val">0</div>
+        <div class="lbl">PAIRES TROUVÉES</div>
+        <div class="dot-row" id="inv-pairs-dots"></div>
+      </div>
+      <div class="inv-stat">
+        <div class="val" id="inv-indices-val">0</div>
+        <div class="lbl">INDICES ACHETÉS</div>
+        <button class="inv-magasin" onclick="navigateTo('indices')">Magasin</button>
+      </div>
+    </div>
+
+    <!-- Collection récente -->
+    <div class="collection-title">Ma Collection Récente</div>
+    <div class="collection-grid" id="collection-grid"></div>
+  </section>
+
+  <!-- ======== PANEL INDICES ======== -->
+  <section class="panel" id="panel-indices">
+    <div class="page-header">
+      <h1 class="page-title">💡 Indices</h1>
+      <p class="page-subtitle">Utilisez vos ressources pour débloquer des indices précieux et comprendre les secrets de la nature appliqués à l'architecture.</p>
+    </div>
+    <div class="indices-grid" id="indices-grid"></div>
+  </section>
+
+  <!-- ======== PANEL À PROPOS ======== -->
+  <section class="panel" id="panel-apropos">
+    <div class="page-header">
+      <h1 class="page-title">🌿 À propos</h1>
+      <p class="page-subtitle">Le projet et l'agence STK Architecture.</p>
+    </div>
+    <div class="apropos-card">
+      <p style="font-size:13px;color:var(--texte-doux);line-height:1.75;margin-bottom:20px">
+        Ce jeu a été conçu dans le cadre d'un projet pédagogique pour <strong>STK Architecture</strong>, agence d'architecture éco-responsable basée à Montreuil, spécialisée dans le <strong>biomimétisme</strong>.
+      </p>
+      <div class="apropos-section">
+        <h3>Qu'est-ce que le biomimétisme ?</h3>
+        <p>Le biomimétisme consiste à s'inspirer des formes, matériaux, processus et stratégies du monde vivant pour créer des solutions durables, efficaces et économiques pour l'être humain.</p>
+      </div>
+      <div class="apropos-section">
+        <h3>STK Architecture</h3>
+        <p>Fondée il y a 17 ans, STK Architecture conçoit des bâtiments durables en intégrant les principes du vivant : ventilation naturelle, matériaux locaux, économie circulaire et architecture organique.</p>
+      </div>
+      <div class="apropos-section">
+        <h3>Ce jeu</h3>
+        <p>Développé par des étudiants de HETIC La Forge (B1, mai 2026), ce prototype interactif vise à rendre le biomimétisme accessible à tous, des adolescents aux professionnels de l'architecture.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ================================================
+     MODAL EXPLICATION
+     ================================================ -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-label">✨ BONNE PAIRE !</div>
+    <div class="modal-title" id="modal-title"></div>
+
+    <div class="modal-pair">
+      <div class="modal-pair-card">
+        <img id="modal-pair-a-img" src="" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gris)">
+        <span class="name" id="modal-pair-a-name"></span>
+      </div>
+      <div class="modal-pair-sep"></div>
+      <div class="modal-pair-card">
+        <img id="modal-pair-b-img" src="" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gris)">
+        <span class="name" id="modal-pair-b-name"></span>
+      </div>
+    </div>
+
+    <div class="modal-text" id="modal-text"></div>
+    <div class="modal-xp">⚡ <span>+100 XP gagnés — continuez !</span></div>
+    <button class="modal-close" id="modal-close">Continuer →</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+
+
+</body></html>
