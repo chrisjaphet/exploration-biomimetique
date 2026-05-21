@@ -66,6 +66,8 @@ const state = {
   sofiaReminderCount: 0,
   idleTimer: null,
   sofiaAutoCloseTimer: null,
+  autoEliminateCount: 0,
+  autoEliminateTimer: null,
 };
 
 // ============================================
@@ -252,6 +254,102 @@ function sofiaShake() {
 }
 
 // ============================================
+// AUTO-ÉLIMINATION DE PAIRES
+// ============================================
+function startAutoEliminateTimer() {
+  if (state.autoEliminateTimer) { clearTimeout(state.autoEliminateTimer); state.autoEliminateTimer = null; }
+  if (state.autoEliminateCount >= 2) return;
+  state.autoEliminateTimer = setTimeout(autoEliminatePair, 40000);
+}
+
+function stopAutoEliminateTimer() {
+  if (state.autoEliminateTimer) { clearTimeout(state.autoEliminateTimer); state.autoEliminateTimer = null; }
+}
+
+function autoEliminatePair() {
+  if (state.autoEliminateCount >= 2) return;
+  if (state.roundPairsRestantes <= 0) return;
+
+  // Trouver une paire non encore validée dans ce round
+  const remaining = state.roundPairs.filter(pid => !state.validatedPairs.includes(pid));
+  if (!remaining.length) return;
+
+  const pairId = remaining[Math.floor(Math.random() * remaining.length)];
+  const cards = typeof CARDS_DATA !== 'undefined'
+    ? CARDS_DATA.filter(c => c.pairId === pairId)
+    : [];
+  if (cards.length < 2) return;
+
+  const vivant = cards.find(c => c.type === 'vivant');
+  const appli  = cards.find(c => c.type === 'application');
+  if (!vivant || !appli) return;
+
+  state.autoEliminateCount++;
+
+  // Annonce Sofia
+  const overlay  = document.getElementById('tutorial-overlay');
+  const textEl   = document.getElementById('darwin-text');
+  const nextBtn  = document.getElementById('darwin-next');
+  const skipBtn  = document.getElementById('darwin-skip');
+  const spotEl   = document.getElementById('tutorial-spotlight');
+  const remaining2 = 2 - state.autoEliminateCount;
+
+  if (overlay && textEl) {
+    textEl.textContent = `🌟 Je t'offre un coup de pouce ! Je révèle une paire pour toi. Il te reste encore ${remaining2 > 0 ? remaining2 + ' coup(s) de pouce' : 'aucun coup de pouce'} disponible${remaining2 > 1 ? 's' : ''}.`;
+    if (nextBtn) nextBtn.textContent = 'Merci Sofia ! 👍';
+    if (skipBtn) skipBtn.textContent = 'Fermer';
+    if (spotEl)  spotEl.style.cssText = 'display:none';
+    overlay.classList.add('idle-mode');
+    overlay.style.display = 'flex';
+    void overlay.offsetWidth;
+    overlay.classList.add('show');
+    setTimeout(sofiaShake, 1200);
+    // Fermeture auto après 8s
+    const autoClose = setTimeout(() => { closeTutorial(); overlay.classList.remove('idle-mode'); }, 8000);
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => { clearTimeout(autoClose); closeTutorial(); overlay.classList.remove('idle-mode'); }, { once: true });
+    }
+  }
+
+  // Illuminer les cartes 2s puis les valider
+  setTimeout(() => {
+    const els = document.querySelectorAll(`#cards-grid .card[data-pid="${pairId}"]`);
+    els.forEach(el => {
+      el.classList.add('card--illuminated');
+      // Scroll vers la carte pour la rendre visible
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    setTimeout(() => {
+      els.forEach(el => {
+        el.classList.remove('card--illuminated', 'card--selected');
+        el.classList.add('card--correcte');
+        const badge = el.querySelector('.card-badge');
+        if (badge) { badge.textContent = '✓'; badge.style.background = '#16A34A'; badge.style.display = 'flex'; }
+        setTimeout(() => el.classList.add('card--validee'), 900);
+        spawnParticles(el);
+      });
+
+      state.validatedPairs.push(pairId);
+      state.roundPairsRestantes--;
+      state.inventaire.push({ vivant, appli });
+      state.pairesReussies++;
+      // Pas de points pour une auto-élimination
+      showFloatingScore(els[0], '🌟 +0', '#8B3A3A');
+      updatePoints();
+      updateScore();
+
+      if (state.roundPairsRestantes === 0) {
+        setTimeout(onRoundComplete, 2200);
+      } else {
+        // Relancer le timer pour une éventuelle 2e élimination
+        startAutoEliminateTimer();
+      }
+    }, 2500);
+  }, 1000);
+}
+
+// ============================================
 // INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -343,6 +441,8 @@ function startRound(n) {
   state.currentRound = n;
   state.superIndiceUsedThisRound = false;
   state.firstCardClickTime = null;
+  state.autoEliminateCount = 0;
+  stopAutoEliminateTimer();
   const start = (n - 1) * state.roundSize;
   state.roundPairs = state.allPairIds.slice(start, start + state.roundSize);
   state.roundPairsRestantes = state.roundPairs.length;
@@ -479,8 +579,9 @@ function markCorrect(a, b) {
   state.selectedCards = [];
   state.combo++;
 
-  // Reset idle timer à chaque bonne réponse
+  // Reset timers à chaque bonne réponse
   startIdleTimer();
+  startAutoEliminateTimer();
 
   if (state.firstCardClickTime) {
     const elapsed = (Date.now() - state.firstCardClickTime) / 1000;
@@ -1132,8 +1233,9 @@ function closeTutorial() {
     setTimeout(() => tutoBtn.classList.remove('pulse-ring'), 10000);
   }
 
-  // Démarrer le timer idle uniquement après le vrai tuto (pas un rappel idle)
+  // Démarrer les timers uniquement après le vrai tuto (pas un rappel idle)
   if (!wasIdle) {
     startIdleTimer();
+    startAutoEliminateTimer();
   }
 }
