@@ -339,7 +339,7 @@ function onCardClick(card, el) {
 
   if (el.classList.contains('card--selected')) {
     el.classList.remove('card--selected');
-    state.selectedCards = state.selectedCards.filter(c => c.id !== card.id);
+    state.selectedCards = state.selectedCards.filter(c => c.card.id !== card.id);
     return;
   }
   if (state.selectedCards.length >= 2) return;
