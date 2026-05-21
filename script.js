@@ -63,6 +63,9 @@ const state = {
   firstCardClickTime: null,
   trophyQueue: [],
   trophyShowing: false,
+  sofiaReminderCount: 0,
+  idleTimer: null,
+  sofiaAutoCloseTimer: null,
 };
 
 // ============================================
@@ -167,6 +170,88 @@ function dismissSplash() {
 }
 
 // ============================================
+// IDLE TIMER — Sofia rappels
+// ============================================
+function startIdleTimer() {
+  stopIdleTimer();
+  state.idleTimer = setTimeout(sofiaIdleReminder, 20000);
+}
+
+function stopIdleTimer() {
+  if (state.idleTimer) { clearTimeout(state.idleTimer); state.idleTimer = null; }
+  if (state.sofiaAutoCloseTimer) { clearTimeout(state.sofiaAutoCloseTimer); state.sofiaAutoCloseTimer = null; }
+}
+
+function sofiaIdleReminder() {
+  if (state.sofiaReminderCount >= 2) return;
+  const overlay = document.getElementById('tutorial-overlay');
+  if (!overlay) return;
+  // Ne pas interrompre un tuto en cours
+  if (overlay.style.display !== 'none' && overlay.classList.contains('show')) return;
+
+  state.sofiaReminderCount++;
+
+  const textEl  = document.getElementById('darwin-text');
+  const nextBtn = document.getElementById('darwin-next');
+  const skipBtn = document.getElementById('darwin-skip');
+  const spotEl  = document.getElementById('tutorial-spotlight');
+
+  let msg;
+  if (state.sofiaReminderCount === 1) {
+    msg = 'Tu galères un peu ? 😅 N\'oublie pas que tu peux acheter des **Indices** dans l\'onglet Indices en haut — ils te donnent des pistes pour trouver une paire !';
+  } else {
+    msg = 'Dernier conseil 🌟 : si tu as 50 pts ou plus, utilise le bouton ✨ Super Indice là-haut à droite — il révèle la paire exacte d\'une carte pendant 3 secondes !';
+    // Highlight super indice button
+    setTimeout(() => {
+      const btn = document.getElementById('btn-super-indice');
+      if (btn) {
+        btn.classList.add('highlight-pulse');
+        setTimeout(() => btn.classList.remove('highlight-pulse'), 3700);
+      }
+    }, 400);
+  }
+
+  if (textEl) textEl.textContent = msg.replace(/\*\*(.*?)\*\*/g, '$1');
+  if (nextBtn) nextBtn.textContent = 'Compris ! 👍';
+  if (skipBtn) skipBtn.textContent = 'Fermer';
+  if (spotEl)  spotEl.style.cssText = 'display:none';
+
+  overlay.classList.add('idle-mode');
+  overlay.style.display = 'flex';
+  void overlay.offsetWidth;
+  overlay.classList.add('show');
+
+  // Shake d'attention 1.5s après l'apparition
+  setTimeout(sofiaShake, 1500);
+
+  // Fermeture auto après 12s si le joueur ne réagit pas
+  state.sofiaAutoCloseTimer = setTimeout(() => {
+    closeTutorial();
+    overlay.classList.remove('idle-mode');
+    // Relancer le timer si encore des rappels dispo
+    if (state.sofiaReminderCount < 2) startIdleTimer();
+  }, 12000);
+
+  // Override boutons pour fermer sans lancer le tuto
+  if (nextBtn) {
+    const onNext = () => {
+      closeTutorial();
+      overlay.classList.remove('idle-mode');
+      nextBtn.removeEventListener('click', onNext);
+      if (state.sofiaReminderCount < 2) startIdleTimer();
+    };
+    nextBtn.addEventListener('click', onNext, { once: true });
+  }
+}
+
+function sofiaShake() {
+  const container = document.querySelector('.darwin-container');
+  if (!container) return;
+  container.classList.add('sofia-shake');
+  setTimeout(() => container.classList.remove('sofia-shake'), 600);
+}
+
+// ============================================
 // INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -220,6 +305,8 @@ document.addEventListener('DOMContentLoaded', () => {
   startRound(1);
   updatePoints();
   updateScore();
+  // Lancer le timer idle dès que le jeu est prêt
+  setTimeout(startIdleTimer, 3000);
 });
 
 // ============================================
@@ -393,6 +480,9 @@ function markCorrect(a, b) {
   state.inventaire.push({ vivant, appli });
   state.selectedCards = [];
   state.combo++;
+
+  // Reset idle timer à chaque bonne réponse
+  startIdleTimer();
 
   if (state.firstCardClickTime) {
     const elapsed = (Date.now() - state.firstCardClickTime) / 1000;
@@ -1029,7 +1119,17 @@ function closeTutorial() {
   const overlay = document.getElementById('tutorial-overlay');
   if (!overlay) return;
   overlay.classList.remove('show');
-  setTimeout(() => { overlay.style.display = 'none'; }, 400);
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    overlay.classList.remove('idle-mode');
+  }, 400);
   document.getElementById('tutorial-spotlight').style.cssText = 'display:none';
   localStorage.setItem('biomimetique_tuto_done', '1');
+
+  // Pulse le bouton ? pendant 10s pour que le joueur le repère
+  const tutoBtn = document.getElementById('btn-tuto');
+  if (tutoBtn) {
+    tutoBtn.classList.add('pulse-ring');
+    setTimeout(() => tutoBtn.classList.remove('pulse-ring'), 10000);
+  }
 }
