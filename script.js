@@ -305,8 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
   startRound(1);
   updatePoints();
   updateScore();
-  // Lancer le timer idle dès que le jeu est prêt
-  setTimeout(startIdleTimer, 3000);
 });
 
 // ============================================
@@ -1118,6 +1116,7 @@ window.addEventListener('resize', repositionSpotlight);
 function closeTutorial() {
   const overlay = document.getElementById('tutorial-overlay');
   if (!overlay) return;
+  const wasIdle = overlay.classList.contains('idle-mode');
   overlay.classList.remove('show');
   setTimeout(() => {
     overlay.style.display = 'none';
@@ -1131,5 +1130,10 @@ function closeTutorial() {
   if (tutoBtn) {
     tutoBtn.classList.add('pulse-ring');
     setTimeout(() => tutoBtn.classList.remove('pulse-ring'), 10000);
+  }
+
+  // Démarrer le timer idle uniquement après le vrai tuto (pas un rappel idle)
+  if (!wasIdle) {
+    startIdleTimer();
   }
 }
